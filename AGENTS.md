@@ -10,7 +10,7 @@
 ├── Dream Engine\            # 引擎源码模板（ActionScript 3.1 / AIR 50.0）及第三方库 SWC —— 改引擎代码必须改这里
 ├── FlappyTest\              # 当前克隆源：人工测试工程（EnginePaths.TemplateSourcePath 指向它）
 ├── .workspace\Project\      # Dream 工作副本 —— 每次 Studio 启动被清空重建，禁止直接编辑
-└── Dream Engine Third Party\  # 第三方依赖库（源文件）（例如 Box2D / Starling）
+└── Dream Engine Third Party\  # 第三方库源码（Box2D / Starling）—— 仅本地保留，不入仓库
 ```
 
 ## 最重要的规则：引擎代码改模板，不要改工作副本

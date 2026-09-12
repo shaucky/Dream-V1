@@ -1,6 +1,9 @@
 # 工作副本与生成目录
 .workspace/
 
+# 第三方库源码（本地保留，不入仓库；仓库用各工程 libs 下预编译的 swc 与随附许可）
+Dream Engine Third Party/
+
 # .NET / Avalonia
 [Bb]in/
 [Oo]bj/
@@ -33,6 +36,3 @@ Thumbs.db
 # 本地开发文件，不随仓库分发
 studio.settings.json
 .vscode/
-
-# 例外：第三方库的编译产物是唯一来源，需要提交
-!Dream Engine Third Party/*/bin/
