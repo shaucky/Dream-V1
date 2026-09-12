@@ -6,7 +6,7 @@ namespace Dream.Studio.Engine
     /// <summary>
     /// 开发阶段桩：集中硬编码引擎子项目的相关路径。
     /// DreamRoot 由宿主程序所在目录上溯四级推断（bin\Debug\net9.0 → 仓库根），
-    /// 保证仓库整体迁移后仍可用；AIR SDK 位于仓库之外，按绝对路径固定。
+    /// 保证仓库整体迁移后仍可用。
     /// </summary>
     internal static class EnginePaths
     {
@@ -20,9 +20,6 @@ namespace Dream.Studio.Engine
 
         /// <summary>工作子项目路径：模板复制目标，编译/运行的根目录。</summary>
         public static readonly string WorkingProjectPath = Path.Combine(DreamRoot, ".workspace", "Project");
-
-        /// <summary>AIR SDK 安装路径（仓库外，绝对路径）。</summary>
-        public static readonly string AirSdkPath = @"d:\Program Files\AIR\AIR51.3.1";
 
         /// <summary>
         /// 项目内的派生数据目录名（对标 Godot 的 .godot/）：存放导入/合图等由资源派生的数据，

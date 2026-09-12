@@ -31,7 +31,6 @@ Thumbs.db
 *.jks
 
 # 本地开发文件，不随仓库分发
-AGENTS.md
 studio.settings.json
 .vscode/
 
