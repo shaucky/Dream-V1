@@ -1,0 +1,17 @@
+{
+	"config": "air",
+	"compilerOptions": {
+		"source-path": [
+			"src"
+		],
+		"library-path": [
+			"libs"
+		],
+		"output": "src/DreamEngine.swf",
+		"define": [
+			{ "name": "CONFIG::STUDIO", "value": true }
+		]
+	},
+	"application": "src/DreamEngine-app.xml",
+	"mainClass": "DreamEngine"
+}

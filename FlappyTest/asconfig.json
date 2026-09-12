@@ -1,0 +1,17 @@
+{
+	"config": "air",
+	"compilerOptions": {
+		"source-path": [
+			"src"
+		],
+		"library-path": [
+			"libs"
+		],
+		"output": "src/FlappyTest.swf",
+		"define": [
+			{ "name": "CONFIG::STUDIO", "value": true }
+		]
+	},
+	"application": "src/FlappyTest-app.xml",
+	"mainClass": "FlappyTest"
+}

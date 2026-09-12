@@ -1,0 +1,428 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Dream.Studio.Panels.Build.BuildWindow"
+        Title="Build"
+        Width="1060" Height="800"
+        MinWidth="880" MinHeight="600"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        Background="#1E2126">
+
+    <Window.Styles>
+        <Style Selector="TextBlock.field-label">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="#C8CED6" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Width" Value="118" />
+            <Setter Property="Margin" Value="0,4,10,4" />
+        </Style>
+        <!-- 每行第二对字段：左侧留白，使两列字段在视觉上分组。 -->
+        <Style Selector="TextBlock.field-label.pair">
+            <Setter Property="Margin" Value="22,4,10,4" />
+        </Style>
+        <Style Selector="TextBlock.section">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#8A9099" />
+            <Setter Property="Margin" Value="0,14,0,4" />
+        </Style>
+        <Style Selector="TextBlock.hint">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="#8A9099" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Background" Value="#2A2E36" />
+            <Setter Property="Foreground" Value="#C8CED6" />
+            <Setter Property="Margin" Value="0,3" />
+        </Style>
+        <Style Selector="ComboBox">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Background" Value="#2A2E36" />
+            <Setter Property="Foreground" Value="#C8CED6" />
+            <Setter Property="Margin" Value="0,3" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="MinWidth" Value="84" />
+            <Setter Property="Background" Value="#3A3E46" />
+            <Setter Property="Foreground" Value="#C8CED6" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.browse">
+            <Setter Property="MinWidth" Value="32" />
+            <Setter Property="Margin" Value="8,3,0,3" />
+        </Style>
+
+        <!-- 标签页外观对齐主窗口各面板的标签（见 DockTheme.axaml）：
+             条带 #262A2F、选中项底色 #1E2126 与内容区连成一体、圆角 3,3,0,0、Padding 10,4。 -->
+        <Style Selector="TabControl">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Grid RowDefinitions="Auto,*">
+                        <Border Background="#262A2F" Padding="3,3,3,0">
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                          VerticalScrollBarVisibility="Disabled">
+                                <ItemsPresenter Name="PART_ItemsPresenter"
+                                                ItemsPanel="{TemplateBinding ItemsPanel}" />
+                            </ScrollViewer>
+                        </Border>
+                        <Border Grid.Row="1" Background="#1E2126">
+                            <ContentPresenter Name="PART_SelectedContentHost"
+                                              Content="{TemplateBinding SelectedContent}"
+                                              ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="TabItem">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="#B8BEC6" />
+            <Setter Property="Padding" Value="10,4" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="PART_TabBorder"
+                            Background="Transparent"
+                            CornerRadius="3,3,0,0"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter Content="{TemplateBinding Header}"
+                                          ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                          VerticalAlignment="Center" />
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="TabItem:pointerover /template/ Border#PART_TabBorder">
+            <Setter Property="Background" Value="#2F333A" />
+        </Style>
+        <Style Selector="TabItem:selected">
+            <Setter Property="Foreground" Value="#FFFFFF" />
+        </Style>
+        <Style Selector="TabItem:selected /template/ Border#PART_TabBorder">
+            <Setter Property="Background" Value="#1E2126" />
+        </Style>
+    </Window.Styles>
+
+    <DockPanel>
+        <!-- 底部：状态 + 动作按钮 -->
+        <Border DockPanel.Dock="Bottom" Margin="16,0,16,14">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Bottom"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Spacing="8"
+                            Margin="0,10,0,0">
+                    <Button x:Name="StageButton" Content="Stage" Click="Stage_Click" />
+                    <Button x:Name="PackageButton" Content="Package" Click="Package_Click" />
+                    <Button x:Name="BuildButton" Content="Build" Click="Build_Click" />
+                    <Button Content="Close" Click="Close_Click" />
+                </StackPanel>
+                <StackPanel Margin="0,10,0,0">
+                    <TextBlock Classes="hint"
+                               Text="Stage = compile release + collect referenced assets + write the app descriptor. Package = run the command in the Command line tab. Build = both, regenerating the command." />
+                    <TextBlock x:Name="StatusText" Classes="hint" Margin="0,5,0,0" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- 通用配置：与平台无关，所有平台共用一份。平台特有的项在各标签页里。 -->
+        <Border DockPanel.Dock="Top"
+                Background="#23262B"
+                BorderBrush="#0E1013"
+                BorderThickness="0,0,0,1"
+                Padding="16,6,16,10">
+            <ScrollViewer MaxHeight="392" HorizontalScrollBarVisibility="Disabled">
+                <Grid ColumnDefinitions="Auto,*,Auto,*"
+                      RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Classes="section" Margin="0,2,0,4" Text="PROJECT" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Classes="field-label" Text="Startup scene" />
+                    <Grid Grid.Row="1" Grid.Column="1" ColumnDefinitions="*,Auto">
+                        <TextBox x:Name="StartupSceneBox" Grid.Column="0"
+                                 Watermark="relative to project root, e.g. src/scenes/Main.space" />
+                        <Button Grid.Column="1" Classes="browse" Content="…" Click="BrowseStartupScene_Click" />
+                    </Grid>
+                    <TextBlock Grid.Row="1" Grid.Column="2" Classes="field-label pair" Text="Output directory" />
+                    <Grid Grid.Row="1" Grid.Column="3" ColumnDefinitions="*,Auto">
+                        <TextBox x:Name="OutputDirBox" Grid.Column="0" Watermark="relative to project root, e.g. build" />
+                        <Button Grid.Column="1" Classes="browse" Content="…" Click="BrowseOutputDir_Click" />
+                    </Grid>
+
+                    <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" ColumnDefinitions="*,Auto">
+                        <TextBlock x:Name="AppSectionLabel" Grid.Column="0"
+                                   Classes="section" Text="APPLICATION" />
+                        <Button Grid.Column="1" Classes="browse" MinWidth="0" Padding="10,0"
+                                Margin="0,12,0,0" Content="Open descriptor" Click="OpenDescriptor_Click" />
+                    </Grid>
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Classes="field-label" Text="Output name" />
+                    <TextBox x:Name="AppNameBox" Grid.Row="3" Grid.Column="1" Watermark="&lt;filename&gt;" />
+                    <TextBlock Grid.Row="3" Grid.Column="2" Classes="field-label pair" Text="Application id" />
+                    <TextBox x:Name="AppIdBox" Grid.Row="3" Grid.Column="3" Watermark="&lt;id&gt;, reverse-DNS" />
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Classes="field-label" Text="Display name" />
+                    <TextBox x:Name="AppDisplayNameBox" Grid.Row="4" Grid.Column="1" Watermark="&lt;name&gt;" />
+                    <TextBlock Grid.Row="4" Grid.Column="2" Classes="field-label pair" Text="Version" />
+                    <TextBox x:Name="AppVersionBox" Grid.Row="4" Grid.Column="3" Watermark="&lt;versionNumber&gt;, e.g. 1.0.0" />
+
+                    <TextBlock Grid.Row="5" Grid.Column="0" Classes="field-label" Text="Version label" />
+                    <TextBox x:Name="AppVersionLabelBox" Grid.Row="5" Grid.Column="1" Watermark="&lt;versionLabel&gt;" />
+                    <TextBlock Grid.Row="5" Grid.Column="2" Classes="field-label pair" Text="Copyright" />
+                    <TextBox x:Name="AppCopyrightBox" Grid.Row="5" Grid.Column="3" Watermark="&lt;copyright&gt;" />
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" Classes="field-label" Text="Publisher id" />
+                    <TextBox x:Name="AppPublisherBox" Grid.Row="6" Grid.Column="1" Watermark="&lt;publisherID&gt;" />
+                    <TextBlock Grid.Row="6" Grid.Column="2" Classes="field-label pair" Text="Multiple instances" />
+                    <ComboBox x:Name="AppMultiInstanceBox" Grid.Row="6" Grid.Column="3" />
+
+                    <TextBlock Grid.Row="7" Grid.Column="0" Classes="field-label" Text="Description" />
+                    <TextBox x:Name="AppDescriptionBox" Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="3"
+                             Watermark="&lt;description&gt;" />
+
+                    <TextBlock Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="4" Classes="section" Text="MAIN WINDOW" />
+
+                    <TextBlock Grid.Row="9" Grid.Column="0" Classes="field-label" Text="Title" />
+                    <TextBox x:Name="WindowTitleBox" Grid.Row="9" Grid.Column="1" Watermark="&lt;initialWindow&gt;/&lt;title&gt;" />
+                    <TextBlock Grid.Row="9" Grid.Column="2" Classes="field-label pair" Text="Render mode" />
+                    <ComboBox x:Name="WindowRenderModeBox" Grid.Row="9" Grid.Column="3" />
+
+                    <TextBlock Grid.Row="10" Grid.Column="0" Classes="field-label" Text="Width / Height" />
+                    <Grid Grid.Row="10" Grid.Column="1" ColumnDefinitions="*,8,*">
+                        <TextBox x:Name="WindowWidthBox" Grid.Column="0" Watermark="width" />
+                        <TextBox x:Name="WindowHeightBox" Grid.Column="2" Watermark="height" />
+                    </Grid>
+                    <TextBlock Grid.Row="10" Grid.Column="2" Classes="field-label pair" Text="Min / Max size" />
+                    <Grid Grid.Row="10" Grid.Column="3" ColumnDefinitions="*,8,*">
+                        <TextBox x:Name="WindowMinSizeBox" Grid.Column="0" Watermark="400 200" />
+                        <TextBox x:Name="WindowMaxSizeBox" Grid.Column="2" Watermark="1600 1200" />
+                    </Grid>
+
+                    <TextBlock Grid.Row="11" Grid.Column="0" Classes="field-label" Text="Display resolution" />
+                    <ComboBox x:Name="WindowResolutionBox" Grid.Row="11" Grid.Column="1" />
+                    <TextBlock Grid.Row="11" Grid.Column="2" Classes="field-label pair" Text="Depth and stencil" />
+                    <ComboBox x:Name="WindowDepthStencilBox" Grid.Row="11" Grid.Column="3" />
+
+                    <TextBlock Grid.Row="12" Grid.Column="0" Classes="field-label" Text="Use Angle" />
+                    <ComboBox x:Name="WindowUseAngleBox" Grid.Row="12" Grid.Column="1" />
+                    <TextBlock Grid.Row="12" Grid.Column="2" Classes="field-label pair" Text="System chrome" />
+                    <ComboBox x:Name="WindowSystemChromeBox" Grid.Row="12" Grid.Column="3" />
+
+                    <TextBlock Grid.Row="13" Grid.Column="0" Classes="field-label" Text="Visible" />
+                    <ComboBox x:Name="WindowVisibleBox" Grid.Row="13" Grid.Column="1" />
+                    <TextBlock Grid.Row="13" Grid.Column="2" Classes="field-label pair" Text="Transparent" />
+                    <ComboBox x:Name="WindowTransparentBox" Grid.Row="13" Grid.Column="3" />
+
+                    <TextBlock Grid.Row="14" Grid.Column="0" Classes="field-label" Text="Resizable" />
+                    <ComboBox x:Name="WindowResizableBox" Grid.Row="14" Grid.Column="1" />
+                    <TextBlock Grid.Row="14" Grid.Column="2" Classes="field-label pair" Text="Minimizable" />
+                    <ComboBox x:Name="WindowMinimizableBox" Grid.Row="14" Grid.Column="3" />
+
+                    <TextBlock Grid.Row="15" Grid.Column="0" Classes="field-label" Text="Maximizable" />
+                    <ComboBox x:Name="WindowMaximizableBox" Grid.Row="15" Grid.Column="1" />
+
+                    <TextBlock Grid.Row="16" Grid.Column="0" Grid.ColumnSpan="4" Classes="hint"
+                               Text="Empty dropdown / text field = keep whatever the app descriptor already has." />
+
+                    <TextBlock Grid.Row="17" Grid.Column="0" Grid.ColumnSpan="4" Classes="section" Text="APPLICATION ICON" />
+
+                    <TextBlock Grid.Row="18" Grid.Column="0" Classes="field-label" Text="Standard icon" />
+                    <Grid Grid.Row="18" Grid.Column="1" Grid.ColumnSpan="3" ColumnDefinitions="*,Auto,Auto">
+                        <TextBox x:Name="IconSourceBox" Grid.Column="0"
+                                 Watermark="PNG used for every size that has no dedicated image of its own" />
+                        <Button Grid.Column="1" Classes="browse" Content="…" Click="BrowseIconSource_Click" />
+                        <Button Grid.Column="2" Margin="8,3,0,3" Content="Use for all sizes" Click="UseStandardIconForAll_Click" />
+                    </Grid>
+
+                    <TextBlock x:Name="IconHintText" Grid.Row="19" Grid.Column="0" Grid.ColumnSpan="4"
+                               Classes="hint" Margin="0,6,0,0" />
+
+                    <Border Grid.Row="20" Grid.Column="0" Grid.ColumnSpan="4" Margin="0,6,0,0"
+                            Background="#23262B" BorderBrush="#0E1013" BorderThickness="1"
+                            CornerRadius="4" Padding="8,6">
+                        <ScrollViewer MaxHeight="168" HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel x:Name="IconSizeList" Spacing="2" />
+                        </ScrollViewer>
+                    </Border>
+
+                    <TextBlock x:Name="DescriptorSupportHint" Grid.Row="21" Grid.Column="0" Grid.ColumnSpan="4"
+                               Classes="hint" Margin="0,8,0,0" />
+                </Grid>
+            </ScrollViewer>
+        </Border>
+
+        <!-- 平台标签页：只放该平台特有的配置。 -->
+        <TabControl x:Name="Tabs" Margin="0,4,0,0">
+            <TabControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </TabControl.ItemsPanel>
+
+            <TabItem x:Name="WindowsTab" Header="Windows" Tag="windows">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <Grid Margin="16,10,16,16"
+                          ColumnDefinitions="Auto,*"
+                          RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Classes="hint"
+                                   Text="Packages with adt -target bundle: a self-contained folder with a captive runtime, ready to run without AIR installed." />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Classes="section" Text="PLATFORM" />
+                        <TextBlock Grid.Row="2" Grid.Column="0" Classes="field-label" Width="150" Text="Architecture" />
+                        <ComboBox x:Name="WinArchitectureBox" Grid.Row="2" Grid.Column="1" />
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Classes="section" Text="DESCRIPTOR — &lt;windows&gt;" />
+                        <TextBlock Grid.Row="4" Grid.Column="0" Classes="field-label" Width="150" Text="Local app data" />
+                        <ComboBox x:Name="WinLocalAppDataBox" Grid.Row="4" Grid.Column="1" />
+                        <TextBlock Grid.Row="5" Grid.Column="0" Classes="field-label" Width="150" Text="Max Direct3D" />
+                        <TextBox x:Name="WinMaxD3DBox" Grid.Row="5" Grid.Column="1" Watermark="9 = force D3D9, 0 = disable Direct3D" />
+                        <TextBlock Grid.Row="6" Grid.Column="0" Classes="field-label" Width="150" Text="Use WebView2" />
+                        <ComboBox x:Name="WinUseWebView2Box" Grid.Row="6" Grid.Column="1" />
+                        <TextBlock Grid.Row="7" Grid.Column="0" Classes="field-label" Width="150" Text="DirectDraw fonts" />
+                        <ComboBox x:Name="WinDirectDrawFontsBox" Grid.Row="7" Grid.Column="1" />
+
+                        <TextBlock Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Classes="section"
+                                   Text="SIGNING (required by ADT — a self-signed dev certificate is generated when empty)" />
+                        <TextBlock Grid.Row="9" Grid.Column="0" Classes="field-label" Width="150" Text="Certificate (.p12/.pfx)" />
+                        <Grid Grid.Row="9" Grid.Column="1" ColumnDefinitions="*,Auto">
+                            <TextBox x:Name="WinKeystoreBox" Grid.Column="0"
+                                     Watermark="leave empty to use a generated self-signed certificate" />
+                            <Button Grid.Column="1" Classes="browse" Content="…" Click="BrowseWinCertificate_Click" />
+                        </Grid>
+                        <TextBlock Grid.Row="10" Grid.Column="0" Classes="field-label" Width="150" Text="Store password" />
+                        <TextBox x:Name="WinStorePassBox" Grid.Row="10" Grid.Column="1" PasswordChar="*" />
+                        <TextBlock Grid.Row="11" Grid.Column="0" Classes="field-label" Width="150" Text="Timestamp (TSA)" />
+                        <TextBox x:Name="WinTsaBox" Grid.Row="11" Grid.Column="1"
+                                 Watermark="empty = ADT default TSA; none = skip timestamping; or an https:// TSA url" />
+                        <TextBlock Grid.Row="12" Grid.Column="0" Classes="field-label" Width="150" Text="Alias / Key password" />
+                        <Grid Grid.Row="12" Grid.Column="1" ColumnDefinitions="*,8,*">
+                            <TextBox x:Name="WinAliasBox" Grid.Column="0" Watermark="alias" />
+                            <TextBox x:Name="WinKeyPassBox" Grid.Column="2" PasswordChar="*" />
+                        </Grid>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem x:Name="AndroidTab" Header="Android" Tag="android">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <Grid Margin="16,10,16,16"
+                          ColumnDefinitions="Auto,*"
+                          RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Classes="hint"
+                                   Text="Packages with adt -target apk-captive-runtime: a self-contained APK, ready to install without AIR on the device. The App Bundle (aab) target additionally needs an Android SDK — set it in Settings." />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Classes="section" Text="PLATFORM" />
+                        <TextBlock Grid.Row="2" Grid.Column="0" Classes="field-label" Width="150" Text="Architecture" />
+                        <ComboBox x:Name="AndroidArchitectureBox" Grid.Row="2" Grid.Column="1"
+                                  ToolTip.Tip="Which AIR runtimes to embed. Not used by the aab target — that one follows &lt;android&gt;/&lt;buildArchitectures&gt;." />
+                        <TextBlock Grid.Row="3" Grid.Column="0" Classes="field-label" Width="150" Text="Target" />
+                        <ComboBox x:Name="AndroidTargetBox" Grid.Row="3" Grid.Column="1"
+                                  ToolTip.Tip="apk-captive-runtime = installable APK carrying the AIR runtime; aab = Android App Bundle for Google Play." />
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Classes="section" Text="DESCRIPTOR — &lt;android&gt;" />
+                        <TextBlock Grid.Row="5" Grid.Column="0" Classes="field-label" Width="150" Text="Color depth" />
+                        <ComboBox x:Name="AndroidColorDepthBox" Grid.Row="5" Grid.Column="1" />
+                        <TextBlock Grid.Row="6" Grid.Column="0" Classes="field-label" Width="150" Text="Build architectures" />
+                        <TextBox x:Name="AndroidBuildArchitecturesBox" Grid.Row="6" Grid.Column="1" Watermark="e.g. armv7,armv8" />
+                        <TextBlock Grid.Row="7" Grid.Column="0" Classes="field-label" Width="150" Text="Contains video" />
+                        <ComboBox x:Name="AndroidContainsVideoBox" Grid.Row="7" Grid.Column="1" />
+                        <TextBlock Grid.Row="8" Grid.Column="0" Classes="field-label" Width="150" Text="Supports Android TV" />
+                        <ComboBox x:Name="AndroidSupportsTvBox" Grid.Row="8" Grid.Column="1" />
+                        <TextBlock Grid.Row="9" Grid.Column="0" Classes="field-label" Width="150" Text="Web debugging" />
+                        <ComboBox x:Name="AndroidWebDebugBox" Grid.Row="9" Grid.Column="1" />
+                        <TextBlock Grid.Row="10" Grid.Column="0" Classes="field-label" Width="150" Text="Create app bundle" />
+                        <ComboBox x:Name="AndroidCreateBundleBox" Grid.Row="10" Grid.Column="1" />
+                        <TextBlock Grid.Row="11" Grid.Column="0" Classes="field-label" Width="150" Text="Prevent device model" />
+                        <ComboBox x:Name="AndroidPreventDeviceModelBox" Grid.Row="11" Grid.Column="1" />
+                        <TextBlock Grid.Row="12" Grid.Column="0" Classes="field-label" Width="150" Text="Async startup" />
+                        <ComboBox x:Name="AndroidAsyncStartupBox" Grid.Row="12" Grid.Column="1" />
+                        <TextBlock Grid.Row="13" Grid.Column="0" Classes="field-label" Width="150" Text="Use camera2" />
+                        <ComboBox x:Name="AndroidCamera2Box" Grid.Row="13" Grid.Column="1" />
+
+                        <TextBlock Grid.Row="14" Grid.Column="0" Grid.ColumnSpan="2" Classes="section"
+                                   Text="SIGNING (ADT ignores -tsa on Android targets, so there is no timestamping here)" />
+                        <TextBlock Grid.Row="15" Grid.Column="0" Classes="field-label" Width="150" Text="Certificate (.p12/.pfx)" />
+                        <Grid Grid.Row="15" Grid.Column="1" ColumnDefinitions="*,Auto">
+                            <TextBox x:Name="AndroidKeystoreBox" Grid.Column="0"
+                                     Watermark="leave empty to use a generated self-signed certificate" />
+                            <Button Grid.Column="1" Classes="browse" Content="…" Click="BrowseAndroidCertificate_Click" />
+                        </Grid>
+                        <TextBlock Grid.Row="16" Grid.Column="0" Classes="field-label" Width="150" Text="Store password" />
+                        <TextBox x:Name="AndroidStorePassBox" Grid.Row="16" Grid.Column="1" PasswordChar="*" />
+                        <TextBlock Grid.Row="17" Grid.Column="0" Classes="field-label" Width="150" Text="Alias / Key password" />
+                        <Grid Grid.Row="17" Grid.Column="1" ColumnDefinitions="*,8,*">
+                            <TextBox x:Name="AndroidAliasBox" Grid.Column="0" Watermark="alias" />
+                            <TextBox x:Name="AndroidKeyPassBox" Grid.Column="2" PasswordChar="*" />
+                        </Grid>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem x:Name="IosTab" Header="iOS" Tag="ios">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <Grid Margin="16,10,16,16"
+                          ColumnDefinitions="Auto,*"
+                          RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Classes="hint"
+                                   Text="iOS packaging is not wired yet — these values are written to the app descriptor and will be picked up once the adt target is added." />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Classes="section" Text="PLATFORM" />
+                        <TextBlock Grid.Row="2" Grid.Column="0" Classes="field-label" Width="150" Text="Architecture" />
+                        <ComboBox x:Name="IosArchitectureBox" Grid.Row="2" Grid.Column="1" />
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Classes="section" Text="DESCRIPTOR — &lt;iPhone&gt;" />
+                        <TextBlock Grid.Row="4" Grid.Column="0" Classes="field-label" Width="150" Text="Display resolution" />
+                        <ComboBox x:Name="IosResolutionBox" Grid.Row="4" Grid.Column="1" />
+                        <TextBlock Grid.Row="5" Grid.Column="0" Classes="field-label" Width="150" Text="Force CPU render" />
+                        <TextBox x:Name="IosForceCpuBox" Grid.Row="5" Grid.Column="1" Watermark="space-separated device models, e.g. iPad1,1 iPhone1,1" />
+                        <TextBlock Grid.Row="6" Grid.Column="0" Classes="field-label" Width="150" Text="Disable custom kbd" />
+                        <ComboBox x:Name="IosCustomKeyboardBox" Grid.Row="6" Grid.Column="1" />
+                        <TextBlock Grid.Row="7" Grid.Column="0" Classes="field-label" Width="150" Text="External swfs" />
+                        <TextBox x:Name="IosExternalSwfsBox" Grid.Row="7" Grid.Column="1" Watermark="file listing external swf paths" />
+
+                        <TextBlock Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Classes="section" Text="SIGNING" />
+                        <TextBlock Grid.Row="9" Grid.Column="0" Classes="field-label" Width="150" Text="Certificate (.p12/.pfx)" />
+                        <Grid Grid.Row="9" Grid.Column="1" ColumnDefinitions="*,Auto">
+                            <TextBox x:Name="IosKeystoreBox" Grid.Column="0" />
+                            <Button Grid.Column="1" Classes="browse" Content="…" Click="BrowseIosCertificate_Click" />
+                        </Grid>
+                        <TextBlock Grid.Row="10" Grid.Column="0" Classes="field-label" Width="150" Text="Store password" />
+                        <Grid Grid.Row="10" Grid.Column="1" ColumnDefinitions="*,8,*">
+                            <TextBox x:Name="IosStorePassBox" Grid.Column="0" PasswordChar="*" />
+                            <TextBox x:Name="IosAliasBox" Grid.Column="2" Watermark="alias" />
+                        </Grid>
+                        <TextBlock Grid.Row="11" Grid.Column="0" Classes="field-label" Width="150" Text="Timestamp (TSA)" />
+                        <TextBox x:Name="IosTsaBox" Grid.Row="11" Grid.Column="1"
+                                 Watermark="empty = ADT default TSA; none = skip timestamping" />
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- 命令行标签页：执行的就是这里的命令，用户可自由修改——ADT 新增参数/平台时不必等 Studio 支持。 -->
+            <TabItem x:Name="CommandTab" Header="Command line">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Classes="hint" Margin="16,12,16,8"
+                               Text="This is the exact command ADT will run. Edit it freely — packaging uses what is here, so ADT options Studio does not know about still work. Stage regenerates it from the platform settings." />
+                    <Border Margin="16,0,16,16"
+                            Background="#2A2E36"
+                            CornerRadius="4"
+                            Padding="8">
+                        <TextBox x:Name="CommandLineBox"
+                                 AcceptsReturn="True"
+                                 TextWrapping="NoWrap"
+                                 FontFamily="Consolas"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Margin="0" />
+                    </Border>
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>

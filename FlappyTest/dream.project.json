@@ -1,0 +1,43 @@
+{
+  "startupScene": "src\\FlappyDream.space",
+  "build": {
+    "platform": "windows",
+    "outputDirectory": "build",
+    "platforms": {
+      "windows": {
+        "architecture": "",
+        "certificate": {
+          "keystore": "",
+          "storepass": "",
+          "alias": "",
+          "keypass": "",
+          "tsa": ""
+        }
+      },
+      "android": {
+        "architecture": "",
+        "certificate": {
+          "keystore": "",
+          "storepass": "",
+          "alias": "",
+          "keypass": "",
+          "tsa": ""
+        }
+      },
+      "ios": {
+        "architecture": "",
+        "certificate": {
+          "keystore": "",
+          "storepass": "",
+          "alias": "",
+          "keypass": "",
+          "tsa": ""
+        }
+      }
+    },
+    "icon": {
+      "source": "",
+      "overrides": {}
+    }
+  }
+}

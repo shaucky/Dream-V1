@@ -1,0 +1,39 @@
+# 工作副本与生成目录
+.workspace/
+
+# .NET / Avalonia
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.suo
+
+# AIR / ActionScript 构建产物
+FlappyTest/build/
+.dream/
+*.swf
+*.swf.meta
+adl*.log
+
+# 日志与系统杂项
+*.log
+err.txt
+out.txt
+desktop.ini
+desktop.ini.meta
+Thumbs.db
+.DS_Store
+
+# 签名与密钥
+*.p12
+*.pfx
+*.keystore
+*.jks
+
+# 本地开发文件，不随仓库分发
+AGENTS.md
+studio.settings.json
+.vscode/
+
+# 例外：第三方库的编译产物是唯一来源，需要提交
+!Dream Engine Third Party/*/bin/

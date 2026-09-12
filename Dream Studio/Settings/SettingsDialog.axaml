@@ -1,0 +1,83 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Dream.Studio.Settings.SettingsDialog"
+        Title="Settings"
+        Width="560"
+        SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Topmost="True"
+        WindowStartupLocation="CenterOwner"
+        Background="#1E2126">
+
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="#C8CED6" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="Background" Value="#2A2E36" />
+            <Setter Property="Foreground" Value="#C8CED6" />
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="MinWidth" Value="80" />
+            <Setter Property="Background" Value="#3A3E46" />
+            <Setter Property="Foreground" Value="#C8CED6" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+        <!-- AIR SDK 路径 -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="16,14,16,0">
+            <TextBlock Grid.Column="0" Text="AIR SDK Path:" Width="90" />
+            <TextBox x:Name="SdkPathBox"
+                     Grid.Column="1"
+                     Margin="8,0"
+                     Watermark="e.g. C:\AIR SDK\AIRSDK_51.3.1" />
+            <Button Grid.Column="2" Content="Browse..." Width="80" Click="Browse_Click" />
+        </Grid>
+
+        <!-- SDK 下载入口 -->
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,*" Margin="16,10,16,0">
+            <TextBlock Grid.Column="0" Text="Download AIR SDK from: " />
+            <HyperlinkButton Grid.Column="1"
+                             Content="AIR SDK Manager"
+                             NavigateUri="https://airsdk.harman.com/download"
+                             FontSize="12"
+                             VerticalAlignment="Center" />
+        </Grid>
+
+        <!-- Android SDK 路径：只有 Android App Bundle（aab）目标需要 -->
+        <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="16,10,16,0">
+            <TextBlock Grid.Column="0" Text="Android SDK:" Width="90" />
+            <TextBox x:Name="AndroidSdkBox"
+                     Grid.Column="1"
+                     Margin="8,0"
+                     Watermark="e.g. C:\Users\me\AppData\Local\Android\Sdk" />
+            <Button Grid.Column="2" Content="Browse..." Width="80" Click="BrowseAndroid_Click" />
+        </Grid>
+
+        <TextBlock Grid.Row="3"
+                   Margin="16,6,16,0"
+                   FontSize="11"
+                   Foreground="#8A9099"
+                   TextWrapping="Wrap"
+                   Text="Only the Android App Bundle (aab) target needs this. Packaging an APK uses the toolchain bundled with the AIR SDK, so it can stay empty." />
+
+        <StackPanel Grid.Row="4"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="8"
+                    Margin="16,18,16,14">
+            <Button Content="OK" Click="Ok_Click" />
+            <Button Content="Cancel" Click="Cancel_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

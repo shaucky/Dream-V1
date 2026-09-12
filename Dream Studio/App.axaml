@@ -1,0 +1,12 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Dream.Studio.App"
+             RequestedThemeVariant="Dark">
+
+    <Application.Styles>
+        <FluentTheme />
+        <!-- ColorPicker 样式不在 FluentTheme 内，需单独引入，否则 ColorPicker 控件无模板、渲染为空。 -->
+        <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+        <StyleInclude Source="avares://Dream.Studio/Docking/Themes/DockTheme.axaml" />
+    </Application.Styles>
+</Application>

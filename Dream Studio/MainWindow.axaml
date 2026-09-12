@@ -1,0 +1,140 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:dock="clr-namespace:Dream.Studio.Docking;assembly=Dream.Studio"
+        xmlns:panels="clr-namespace:Dream.Studio.Panels;assembly=Dream.Studio"
+        x:Class="Dream.Studio.MainWindow"
+        Title="Dream Studio"
+        Width="1280" Height="800"
+        Background="#1E2126"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="-1">
+
+    <Window.Styles>
+        <StyleInclude Source="avares://Dream.Studio/Themes/MainWindowTheme.axaml" />
+    </Window.Styles>
+
+    <DockPanel LastChildFill="True">
+        <Border x:Name="TitleBar"
+                DockPanel.Dock="Top"
+                Background="#17191D"
+                Height="40"
+                PointerPressed="TitleBar_PointerPressed"
+                DoubleTapped="TitleBar_DoubleTapped">
+            <Grid ColumnDefinitions="400,*,400" HorizontalAlignment="Stretch">
+                <TextBlock Grid.Column="1"
+                           Text="Dream Studio"
+                           VerticalAlignment="Center"
+                           FontSize="13"
+                           TextAlignment="Center"
+                           Foreground="#E6E8EB" />
+
+                <StackPanel Grid.Column="2"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Stretch"
+                            HorizontalAlignment="Right"
+                            Spacing="8">
+                    <Button x:Name="SdkStatusButton"
+                            Click="SdkStatusButton_Click"
+                            VerticalAlignment="Center"
+                            Margin="0,0,4,0"
+                            Background="Transparent"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="8,3"
+                            FontSize="10"
+                            FontWeight="SemiBold">
+                        <TextBlock x:Name="SdkStatusText"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Center" />
+                    </Button>
+
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Stretch">
+                        <Button x:Name="MinButton"
+                                Classes="caption-btn min"
+                                Click="MinButton_Click"
+                                ToolTip.Tip="Minimize">
+                            <Path Data="M0,6 H10" Stroke="#E6E8EB" StrokeThickness="1" Width="10" Height="10" />
+                        </Button>
+                        <Button x:Name="MaxButton"
+                                Classes="caption-btn max"
+                                Click="MaxButton_Click"
+                                ToolTip.Tip="Maximize">
+                            <Path x:Name="MaxIcon"
+                                  Data="M0,0 H10 V10 H0 Z"
+                                  Stroke="#E6E8EB"
+                                  StrokeThickness="1"
+                                  Width="10" Height="10" />
+                        </Button>
+                        <Button x:Name="CloseButton"
+                                Classes="caption-btn close"
+                                Click="CloseButton_Click"
+                                ToolTip.Tip="Close">
+                            <Path Data="M0,0 L10,10 M10,0 L0,10" Stroke="#E6E8EB" StrokeThickness="1" Width="10" Height="10" />
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 工具栏：运行/终止（同按钮切换）+ 暂停。位于标题栏下方。 -->
+        <Border DockPanel.Dock="Top" Background="#1B1E23" Padding="6,3">
+            <Grid ColumnDefinitions="*, Auto, *">
+            <StackPanel Orientation="Horizontal" Spacing="6" Grid.Column="1">
+                    <Button x:Name="RunButton"
+                        Click="RunButton_Click"
+                        FontSize="11"
+                        MinWidth="64"
+                        HorizontalContentAlignment="Center"
+                        Background="#2A2E35"
+                        BorderBrush="#3A3F47"
+                        Foreground="#E6E8EB"
+                        Padding="10,3"
+                        ToolTip.Tip="Run / Terminate" />
+                    <Button x:Name="PauseButton"
+                        Click="PauseButton_Click"
+                        FontSize="11"
+                        MinWidth="64"
+                        HorizontalContentAlignment="Center"
+                        Background="#2A2E35"
+                        BorderBrush="#3A3F47"
+                        Foreground="#E6E8EB"
+                        Padding="10,3"
+                        ToolTip.Tip="Pause / Resume" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 菜单栏：File / Edit / Panel / Help -->
+        <Menu DockPanel.Dock="Top" FontSize="11" Background="#1E2126" Foreground="#E6E8EB">
+            <MenuItem Header="File(_F)">
+                <MenuItem Header="_Open Project..." Click="FileOpenProject_Click" />
+                <Separator />
+                <MenuItem Header="_Open..." Click="FileOpenScene_Click" />
+                <MenuItem Header="_Save" Click="FileSaveScene_Click" HotKey="Ctrl+S" />
+                <MenuItem Header="Save _As..." Click="FileSaveSceneAs_Click" HotKey="Ctrl+Shift+S" />
+                <Separator />
+                <MenuItem Header="E_xit" Click="FileExit_Click" />
+            </MenuItem>
+            <MenuItem Header="Edit(_E)">
+                <!-- 注意：焦点在嵌入的 Engine 窗口时，Avalonia 菜单快捷键不触发（键盘事件进入 ADL 窗口）。
+                     Ctrl+C/V/D/Z/Y 已在引擎侧 DreamEngine.initEditorShortcuts（DreamEngine.as）兜底实现，
+                     两处快捷键须保持一致，修改任一须同步另一处。
+                     Ctrl+S/Ctrl+Shift+S 亦支持：引擎窗口发 engine.shortcut 请求 Studio 执行保存
+                     （对话框仍由 Studio 弹出），见 EngineShortcutHandler 与 HandleEngineSaveRequestAsync。 -->
+                <MenuItem Header="_Undo" Click="EditUndo_Click" HotKey="Ctrl+Z" />
+                <MenuItem Header="_Redo" Click="EditRedo_Click" HotKey="Ctrl+Y" />
+            </MenuItem>
+            <MenuItem Header="Build(_B)">
+                <MenuItem Header="_Build..." Click="Build_Click" />
+            </MenuItem>
+            <panels:PanelMenu x:Name="PanelMenuItem" Header="Panel(_P)" />
+            <MenuItem Header="Help(_H)">
+                <MenuItem Header="_Settings..." Click="ToolsSettings_Click" />
+            </MenuItem>
+        </Menu>
+
+        <dock:DockHost x:Name="Host" Margin="4" />
+    </DockPanel>
+</Window>

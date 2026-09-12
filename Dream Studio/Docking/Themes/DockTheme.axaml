@@ -1,0 +1,141 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:dock="clr-namespace:Dream.Studio.Docking;assembly=Dream.Studio">
+
+    <Styles.Resources>
+        <SolidColorBrush x:Key="DockHostBackground" Color="#23262B" />
+        <SolidColorBrush x:Key="DockGroupBackground" Color="#2B2F35" />
+        <SolidColorBrush x:Key="DockContentBackground" Color="#1E2126" />
+        <SolidColorBrush x:Key="DockTabStripBackground" Color="#262A2F" />
+        <SolidColorBrush x:Key="DockBorderBrush" Color="#0E1013" />
+        <SolidColorBrush x:Key="DockTabForeground" Color="#B8BEC6" />
+        <SolidColorBrush x:Key="DockTabActiveForeground" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="DockSplitterBackground" Color="#16181C" />
+        <SolidColorBrush x:Key="DockSplitterHover" Color="#3A6EA5" />
+        <SolidColorBrush x:Key="DockEmptyBorder" Color="#3A3F47" />
+        <SolidColorBrush x:Key="DockEmptyText" Color="#8A9099" />
+        <SolidColorBrush x:Key="DockCloseHover" Color="#3A3F47" />
+    </Styles.Resources>
+
+    <!-- DockHost: a single root grid that the control populates with surface + overlay. -->
+    <Style Selector="dock|DockHost">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid x:Name="PART_Root" Background="{DynamicResource DockHostBackground}" />
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- DockTabGroup: tab strip on top, active content below. -->
+    <Style Selector="dock|DockTabGroup">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{DynamicResource DockGroupBackground}">
+                    <Grid RowDefinitions="Auto,*">
+                        <Border Grid.Row="0"
+                                Background="{DynamicResource DockTabStripBackground}"
+                                Padding="3,3,3,0">
+                            <StackPanel x:Name="PART_Tabs" Orientation="Horizontal" />
+                        </Border>
+                        <Border x:Name="PART_Content"
+                                Grid.Row="1"
+                                Background="{DynamicResource DockContentBackground}" />
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- DockTabHeader: a single tab. The :selected pseudo-class highlights the background. -->
+    <Style Selector="dock|DockTabHeader">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border x:Name="bg"
+                        Background="Transparent"
+                        CornerRadius="3,3,0,0"
+                        BorderBrush="{DynamicResource DockBorderBrush}"
+                        BorderThickness="0,0,1,0"
+                        Padding="10,4">
+                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <TextBlock Text="{TemplateBinding Title}"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource DockTabForeground}" />
+                        <Button x:Name="PART_Close"
+                                Classes="dock-close"
+                                IsVisible="{TemplateBinding CanClose}" />
+                    </StackPanel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="dock|DockTabHeader:pointerover /template/ Border#bg">
+        <Setter Property="Background" Value="#2F333A" />
+    </Style>
+
+    <Style Selector="dock|DockTabHeader:selected /template/ Border#bg">
+        <Setter Property="Background" Value="{DynamicResource DockContentBackground}" />
+    </Style>
+
+    <Style Selector="dock|DockTabHeader:selected /template/ TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource DockTabActiveForeground}" />
+    </Style>
+
+    <!-- DockSplitter: a thin bar that brightens on hover. -->
+    <Style Selector="dock|DockSplitter">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border x:Name="bg" Background="{DynamicResource DockSplitterBackground}" />
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="dock|DockSplitter:pointerover /template/ Border#bg">
+        <Setter Property="Background" Value="{DynamicResource DockSplitterHover}" />
+    </Style>
+
+    <!-- Close button: a flat, transparent glyph that highlights on hover. -->
+    <Style Selector="Button.dock-close">
+        <Setter Property="Width" Value="16" />
+        <Setter Property="Height" Value="16" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border x:Name="bg"
+                        Background="Transparent"
+                        CornerRadius="3">
+                    <TextBlock Text="✕"
+                               FontSize="11"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource DockTabForeground}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="Button.dock-close:pointerover /template/ Border#bg">
+        <Setter Property="Background" Value="{DynamicResource DockCloseHover}" />
+    </Style>
+
+    <Style Selector="Button.dock-close:pressed /template/ Border#bg">
+        <Setter Property="Background" Value="#4A5058" />
+    </Style>
+
+    <!-- Empty-host placeholder. -->
+    <Style Selector="Border.dock-empty">
+        <Setter Property="Background" Value="{DynamicResource DockHostBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource DockEmptyBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Margin" Value="6" />
+    </Style>
+
+    <Style Selector="Border.dock-empty TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource DockEmptyText}" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+</Styles>

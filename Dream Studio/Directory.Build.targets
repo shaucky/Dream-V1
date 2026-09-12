@@ -1,0 +1,6 @@
+<Project>
+  <!-- 覆盖 Avalonia.BuildServices.targets 中的 AvaloniaStats 遥测目标：
+       离线/沙箱环境无法写入遥测日志（buildtasks.log），会导致构建失败。
+       Directory.Build.targets 在包 targets 之后导入，同名目标以本处定义为准。 -->
+  <Target Name="AvaloniaStats" />
+</Project>

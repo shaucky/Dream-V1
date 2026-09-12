@@ -1,0 +1,52 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- 菜单栏样式：深色背景，匹配窗口主题 -->
+    <Style Selector="Menu">
+        <Setter Property="Background" Value="#1E2126" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Foreground" Value="#E6E8EB" />
+        <Setter Property="Padding" Value="6,2" />
+    </Style>
+    <Style Selector="Menu > MenuItem:pointerover">
+        <Setter Property="Background" Value="#2A2D32" />
+    </Style>
+    <Style Selector="MenuItem:pointerover">
+        <Setter Property="Background" Value="#2A2D32" />
+    </Style>
+
+    <!-- Windows 原生风格标题按钮：默认透明，悬浮时最小化/最大化按钮变浅，关闭按钮变红 -->
+    <Style Selector="Button.caption-btn">
+        <Setter Property="Width" Value="46" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="#E6E8EB" />
+    </Style>
+    <Style Selector="Button.caption-btn.min:pointerover">
+        <Setter Property="Background" Value="#3A3D42" />
+    </Style>
+    <Style Selector="Button.caption-btn.min:pressed">
+        <Setter Property="Background" Value="#2A2D32" />
+    </Style>
+    <Style Selector="Button.caption-btn.max:pointerover">
+        <Setter Property="Background" Value="#3A3D42" />
+    </Style>
+    <Style Selector="Button.caption-btn.max:pressed">
+        <Setter Property="Background" Value="#2A2D32" />
+    </Style>
+    <!-- 关闭按钮：悬浮红，按下浅红。pressed 写在 pointerover 之后以覆盖后者 -->
+    <Style Selector="Button.caption-btn.close:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#E81123" />
+    </Style>
+    <Style Selector="Button.caption-btn.close:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="#F1707A" />
+    </Style>
+    <Style Selector="Button.caption-btn.close:pointerover Path">
+        <Setter Property="Stroke" Value="White" />
+    </Style>
+    <Style Selector="Button.caption-btn.close:pressed Path">
+        <Setter Property="Stroke" Value="White" />
+    </Style>
+</Styles>
